@@ -9,3 +9,11 @@ from .NelsonSiegelCurvature import (
     NSC_histo,
     NSC_comps
 )
+
+from .Scraping import (
+    tbond,
+    oat,
+    ester,
+    bunds,
+    fred
+)
