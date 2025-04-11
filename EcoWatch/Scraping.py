@@ -94,3 +94,36 @@ def fred(key, ticker):
     df = df[df != "."]
     df = df.astype(float)
     return df
+
+def fedfunds(ticker='EFFR', start='2000-01-01', end='2025-01-01'):
+    """
+    Fetches historical interest rate data from the New York Federal Reserve's website.
+
+    Parameters:
+    - ticker (str): The ticker symbol for the interest rate type. Available options are:
+        - 'EFFR': Effective Federal Funds Rate
+        - 'OBFR': Overnight Bank Funding Rate
+        - 'TGCR': Tri-Party General Collateral Rate
+        - 'BGCR': Broad General Collateral Rate
+        - 'SOFR': Secured Overnight Financing Rate
+      Default is 'EFFR'.
+    - start (str): The start date for the data range in 'YYYY-MM-DD' format. Default is '2000-01-01'.
+    - end (str): The end date for the data range in 'YYYY-MM-DD' format. Default is '2025-01-01'.
+
+    Returns:
+    - pd.DataFrame: A DataFrame containing the interest rate data indexed by date.
+    """
+    ticker_dict = {
+        'EFFR': '500',
+        'OBFR': '505',
+        'TGCR': '510',
+        'BGCR': '515',
+        'SOFR': '520',
+    }
+    url = (f"https://markets.newyorkfed.org/read?startDt={start}&endDt={end}&eventCodes={ticker_dict[ticker]}&productCode=50&sort=postDt:-1,eventCode:1&format=csv")
+    response = requests.get(url)
+    csv_file = io.StringIO(response.text)
+    data = pd.read_csv(csv_file, index_col='Effective Date')
+    data.index = pd.to_datetime(data.index)
+    data = data.drop(columns=['Rate Type'])
+    return data
