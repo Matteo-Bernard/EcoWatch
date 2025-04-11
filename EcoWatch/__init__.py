@@ -15,5 +15,6 @@ from .Scraping import (
     oat,
     ester,
     bunds,
-    fred
+    fred,
+    fedfunds
 )
