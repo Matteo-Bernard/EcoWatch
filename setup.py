@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="EcoWatch",
-    version="0.0.2",
+    version="0.0.3",
     description="Visualisation d'indicateurs économiques",
     author="Matteo Bernard",
     packages=find_packages(),
