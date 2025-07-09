@@ -16,5 +16,6 @@ from .Scraping import (
     ester,
     bunds,
     fred,
-    fedfunds
+    fed_funds,
+    euro_yields
 )

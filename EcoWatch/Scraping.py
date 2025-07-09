@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import datetime as dt
 import pandas as pd
 import numpy as np
 import requests
@@ -108,7 +109,7 @@ def fred(key, ticker):
     df = df.astype(float)
     return df
 
-def fedfunds(ticker='EFFR', start='2000-01-01', end='2025-01-01'):
+def fed_funds(ticker='EFFR'):
     """
     Fetches historical interest rate data from the New York Federal Reserve's website.
 
@@ -126,6 +127,8 @@ def fedfunds(ticker='EFFR', start='2000-01-01', end='2025-01-01'):
     Returns:
     - pd.DataFrame: A DataFrame containing the interest rate data indexed by date.
     """
+    start='2000-01-01'
+    end=dt.datetime.now().strftime("%Y-%m-%d")
     ticker_dict = {
         'EFFR': '500',
         'OBFR': '505',
@@ -133,7 +136,7 @@ def fedfunds(ticker='EFFR', start='2000-01-01', end='2025-01-01'):
         'BGCR': '515',
         'SOFR': '520',
     }
-    url = (f"https://markets.newyorkfed.org/read?startDt={start}&endDt={end}&eventCodes={ticker_dict[ticker]}&productCode=50&sort=postDt:-1,eventCode:1&format=csv")
+    url = (f"https://markets.newyorkfed.org/read?startDt={start}&endDt={end}&eventCodes={ticker_dict[ticker]}&productCode=50&sort=postDt:1,eventCode:1&format=csv")
     response = requests.get(url)
     csv_file = io.StringIO(response.text)
     data = pd.read_csv(csv_file, index_col='Effective Date')
