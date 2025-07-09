@@ -177,6 +177,7 @@ def euro_yield(category='ARI'):
             obs['TIME_PERIOD']: float(obs['OBS_VALUE'])
             for obs in soup.find_all('Obs')
         }
-        df[maturity] = pd.Series(data, name='9M')
-
+        df[maturity] = data
+    
+    df.index = pd.to_datetime(df.index)
     return df
