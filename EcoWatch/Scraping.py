@@ -181,3 +181,63 @@ def euro_yield(category='ARI'):
     
     df.index = pd.to_datetime(df.index)
     return df
+
+import pandas as pd
+import datetime as dt
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+import json
+import time
+
+def cnn():
+    # Configuration du navigateur
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.199 Safari/537.36")
+
+    # Initialisation du driver
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    # URL cible
+    url = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
+
+    # Ouverture de la page
+    driver.get(url)
+    time.sleep(2)
+
+    # Récupération brute du texte JSON
+    json_raw = driver.find_element(By.TAG_NAME, "pre").text
+    json_clean = json.loads(json_raw)
+    driver.quit()
+
+    dict = {
+        'Fear and Greed'       : 'fear_and_greed_historical', 
+        'Market Momentum SP500' : 'market_momentum_sp500', 
+        'Stock Price Strength'  : 'stock_price_strength', 
+        'Stock Price Breadth'   : 'stock_price_breadth', 
+        'Put Call Options'      : 'put_call_options', 
+        'Market Volatility VIX' : 'market_volatility_vix',
+        'Junk Bond Demand'      : 'junk_bond_demand', 
+        'Safe Haven Demand'     : 'safe_haven_demand'
+    }
+    index = pd.DataFrame(json_clean['fear_and_greed_historical']['data'])['x']
+    columns = dict.keys()
+    df = pd.DataFrame(index=index, columns=columns)
+
+    for name, ticker in dict.items():
+        data = pd.DataFrame(json_clean[ticker]['data'])
+        data = data.set_index('x', drop=True)
+        df[name] = data['y']
+        df[f'{name} Rating'] = data['rating']
+    
+    df.index = pd.to_datetime(df.index, unit='ms')
+    df = df.resample('B').last()
+    df = df.dropna()
+
+    return df
