@@ -43,7 +43,7 @@ class NSC: # Nelson Siegel Curvature
         Stocke en mémoire :
         - ns_params_df (pd.DataFrame) : Paramètres ajustés Nelson-Siegel et résidus.
         """
-        self.ns_params_df = pd.DataFrame(columns=['Intercept', 'Slope', 'Curvature', 'Lambda', 'Residuals'])
+        self.ns_params_df = pd.DataFrame(columns=['b1', 'b2', 'b3', 'l1', 'r'])
 
         for date, yield_curve in tqdm(yields.iterrows(), desc="Fitting Nelson-Siegel"):
             res = minimize(self._objective_function, 
