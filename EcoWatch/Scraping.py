@@ -31,7 +31,10 @@ def tbond(first_year, last_year):
             yr_cols.append((float(num), col))
     mo_cols.sort()
     yr_cols.sort()
-    return tbond_df[[col for _, col in mo_cols + yr_cols]]   
+    tbond_df = tbond_df[[col for _, col in mo_cols + yr_cols]]  
+    tbond_df = tbond_df.drop(columns=('1.5 Month'))
+    tbond_df.columns = [mat.replace(' Mo', 'M').replace(' Yr', 'Y') for mat in tbond_df.columns] 
+    return tbond_df
 
 
 def oat():
