@@ -52,7 +52,8 @@ def oat():
     # Sort and fill missing values
     df = df.sort_index()
     df = df[['1 Yr', '2 Yr', '3 Yr', '5 Yr', '7 Yr', '10 Yr', '15 Yr', '20 Yr', '25 Yr', '30 Yr']]
-    df = df.resample('D').ffill()
+    df.columns = ['1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '15Y', '20Y', '25Y', '30Y']
+    df = df.resample('B').ffill()
     return df.ffill()  
 
 def ester():
