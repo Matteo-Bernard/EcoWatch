@@ -68,15 +68,27 @@ def ester():
     return df.astype(float)
 
 def bunds():    
-    url = 'https://api.statistiken.bundesbank.de/rest/download/BBSSY/D.REN.EUR.A610.000000WT0202.A?format=csv&lang=en'
-    response = requests.get(url)
-    content = response.content.decode('utf-8')
-    content = csv.reader(content.splitlines(), delimiter=',')
-    df = pd.DataFrame(list(content))
-    df = df.set_index(0)
-    df = df.iloc[9:,0]
-    df = df.replace(".", np.nan).dropna()
-    df.name = 'Bunds 2 Yr'
+    urls = {
+        '1Y'    : 'https://api.statistiken.bundesbank.de/rest/download/BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R01XX.R.A.A._Z._Z.A?format=csv&lang=en',
+        '2Y'    : 'https://api.statistiken.bundesbank.de/rest/download/BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R02XX.R.A.A._Z._Z.A?format=csv&lang=en',
+        '3Y'    : 'https://api.statistiken.bundesbank.de/rest/download/BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R03XX.R.A.A._Z._Z.A?format=csv&lang=en',
+        '5Y'    : 'https://api.statistiken.bundesbank.de/rest/download/BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R05XX.R.A.A._Z._Z.A?format=csv&lang=en',
+        '7Y'    : 'https://api.statistiken.bundesbank.de/rest/download/BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R07XX.R.A.A._Z._Z.A?format=csv&lang=en',
+        '10Y'   : 'https://api.statistiken.bundesbank.de/rest/download/BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R10XX.R.A.A._Z._Z.A?format=csv&lang=en',
+        '20Y'   : 'https://api.statistiken.bundesbank.de/rest/download/BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R20XX.R.A.A._Z._Z.A?format=csv&lang=en',
+        '30Y'   : 'https://api.statistiken.bundesbank.de/rest/download/BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R30XX.R.A.A._Z._Z.A?format=csv&lang=en',
+    }
+    df = pd.DataFrame(columns=urls.keys())
+    for mat, url in urls.items():
+        response = requests.get(url)
+        content = response.content.decode('utf-8')
+        content = csv.reader(content.splitlines(), delimiter=',')
+        data = pd.DataFrame(list(content))
+        data = data.set_index(0)
+        data = data.iloc[9:,0]
+        data = data.replace(".", np.nan).dropna()
+        data.name = mat
+        df[mat] = data  
     df.index = pd.to_datetime(df.index, format='ISO8601')
     return df.astype(float)
 
@@ -127,3 +139,36 @@ def fedfunds(ticker='EFFR', start='2000-01-01', end='2025-01-01'):
     data.index = pd.to_datetime(data.index)
     data = data.drop(columns=['Rate Type'])
     return data
+
+def euro_yield(category='ARI'):
+
+    headers = {"Accept": "application/vnd.sdmx.structurespecificdata+xml;version=2.1"}
+
+    if      category == 'ARI': gn = 'G_N_C'
+    elif    category == 'AAA': gn = 'G_N_A'
+
+    maturity_dict = {
+        '1Y'    : 'SR_1Y',
+        '2Y'    : 'SR_2Y',
+        '3Y'    : 'SR_3Y',
+        '5Y'    : 'SR_5Y',
+        '7Y'    : 'SR_7Y',
+        '10Y'   : 'SR_10Y',
+        '20Y'   : 'SR_20Y',
+        '30Y'   : 'SR_30Y',
+    }
+
+    df = pd.DataFrame(columns=maturity_dict.keys())
+    
+    for maturity, sr in maturity_dict.items():
+        url = f'https://data-api.ecb.europa.eu/service/data/YC/B.U2.EUR.4F.{gn}.SV_C_YM.{sr}'
+        r = requests.get(url=url, headers=headers)
+        soup = BeautifulSoup(r.content, 'xml')
+
+        data = {
+            obs['TIME_PERIOD']: float(obs['OBS_VALUE'])
+            for obs in soup.find_all('Obs')
+        }
+        df[maturity] = pd.Series(data, name='9M')
+
+    return df
