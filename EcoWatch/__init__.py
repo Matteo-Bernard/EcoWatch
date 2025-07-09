@@ -17,5 +17,5 @@ from .Scraping import (
     bunds,
     fred,
     fed_funds,
-    euro_yields
+    euro_yield
 )
