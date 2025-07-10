@@ -241,3 +241,20 @@ def cnn():
     df = df.dropna()
 
     return df
+
+import pandas as pd
+import requests
+
+def eia(key, route, contract, product):
+    url = f'https://api.eia.gov/v2/{route}/pri/{contract}/data/?frequency=daily&data[0]=value&facets[product][]={product}&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000&api_key={key}'
+    json = requests.get(url=url).json()
+    data = pd.DataFrame(json['response']['data'])
+    data = data.set_index('period')
+    data = data['value']
+    data.index = pd.to_datetime(data.index)
+    data = data.sort_index(ascending=True)
+    data = data.groupby(data.index).last()
+    data = data.dropna()
+    data = data.resample('B').ffill()
+    data = data.astype(float)
+    return data

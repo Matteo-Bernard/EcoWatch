@@ -18,5 +18,6 @@ from .Scraping import (
     fred,
     fed_funds,
     euro_yield,
-    cnn
+    cnn,
+    eia
 )
