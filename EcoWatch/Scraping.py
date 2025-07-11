@@ -172,9 +172,8 @@ def ecb(ticker):
     soup = BeautifulSoup(r.content,'xml')
     data = [{'Date': obs['TIME_PERIOD'], 'Value': float(obs['OBS_VALUE'])} for obs in soup.find_all('Obs')]
     df = pd.DataFrame(data, columns=['Date', 'Value'])
-    df = df.set_index('Date', drop=True)
-    df.index = pd.to_datetime(df.index)
-    return df
+    df['Date'] = pd.to_datetime(df['Date'])
+    return df['Value']
 
 import pandas as pd
 import datetime as dt
