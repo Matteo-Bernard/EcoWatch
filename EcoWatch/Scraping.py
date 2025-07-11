@@ -148,37 +148,22 @@ def fed_funds(ticker='EFFR'):
     data = data.drop(columns=['Rate Type'])
     return data
 
-def euro_yield(category='ARI'):
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
 
+def ecb(ticker):
     headers = {"Accept": "application/vnd.sdmx.structurespecificdata+xml;version=2.1"}
-
-    if      category == 'ARI': gn = 'G_N_C'
-    elif    category == 'AAA': gn = 'G_N_A'
-
-    maturity_dict = {
-        '1Y'    : 'SR_1Y',
-        '2Y'    : 'SR_2Y',
-        '3Y'    : 'SR_3Y',
-        '5Y'    : 'SR_5Y',
-        '7Y'    : 'SR_7Y',
-        '10Y'   : 'SR_10Y',
-        '20Y'   : 'SR_20Y',
-        '30Y'   : 'SR_30Y',
-    }
-
-    df = pd.DataFrame(columns=maturity_dict.keys())
-    
-    for maturity, sr in maturity_dict.items():
-        url = f'https://data-api.ecb.europa.eu/service/data/YC/B.U2.EUR.4F.{gn}.SV_C_YM.{sr}'
-        r = requests.get(url=url, headers=headers)
-        soup = BeautifulSoup(r.content, 'xml')
-
-        data = {
-            obs['TIME_PERIOD']: float(obs['OBS_VALUE'])
-            for obs in soup.find_all('Obs')
-        }
-        df[maturity] = data
-    
+    key = ticker.partition('.')[0] + '/' + ticker.partition('.')[2]
+    url = f'https://data-api.ecb.europa.eu/service/data/{key}?format=xml'
+    r = requests.get(url=url, headers=headers)
+    soup = BeautifulSoup(r.content,'xml')
+    data = [
+        {'Date': obs['TIME_PERIOD'], 'Value': float(obs['OBS_VALUE'])}
+        for obs in soup.find_all('Obs')
+    ]
+    df = pd.DataFrame(data, columns=['Date', 'Value'])
+    df = df.set_index('Date', drop=True)
     df.index = pd.to_datetime(df.index)
     return df
 

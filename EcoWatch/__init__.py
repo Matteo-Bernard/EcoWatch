@@ -17,7 +17,7 @@ from .Scraping import (
     bunds,
     fred,
     fed_funds,
-    euro_yield,
+    ecb,
     cnn,
     eia,
     binance
