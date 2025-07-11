@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="EcoWatch",
-    version="0.0.4",
+    version="0.0.5",
     description="Visualisation d'indicateurs économiques",
     author="Matteo Bernard",
     packages=find_packages(),
@@ -12,7 +12,6 @@ setup(
         "typing",
         "scipy",
         "matplotlib",
-        "binance.client",
         "requests",
         "selenium",
         "bs4"
