@@ -258,3 +258,32 @@ def eia(key, route, contract, product):
     data = data.resample('B').ffill()
     data = data.astype(float)
     return data
+
+from binance.client import Client
+import pandas as pd
+import datetime as dt
+
+def binance(key, secret, symbol, start, end):
+    client = Client(key, secret)
+    interval = Client.KLINE_INTERVAL_1DAY
+    start_str = str(dt.datetime.strptime(start, '%Y/%m/%d'))
+    end_str = str(dt.datetime.strptime(end, '%Y/%m/%d'))
+    klines = client.get_historical_klines(
+        symbol=symbol, 
+        interval=interval, 
+        start_str=start_str, 
+        end_str=end_str
+    )
+    columns  =['Open Time', 'Open', 'High', 'Low', 'Close', 'Volume', 'Close Time', 'Quote Asset Volume', 'Number of Trades', 'Taker Buy Base Asset Volume', 'Taker Buy Quote Asset Volume', 'Ignore']
+    df = pd.DataFrame(klines, columns=columns)
+
+    columns_to_convert = ['Open', 'High', 'Low', 'Close', 'Volume', 'Quote Asset Volume', 'Number of Trades', 'Taker Buy Base Asset Volume', 'Taker Buy Quote Asset Volume']
+
+    for col in columns_to_convert:
+        df[col] = df[col].astype(float)
+
+    df['Open Time'] = pd.to_datetime(df['Open Time'], unit='ms')
+    df['Close Time'] = pd.to_datetime(df['Close Time'], unit='ms')
+    df = df.set_index('Open Time', drop=True)
+
+    return df
