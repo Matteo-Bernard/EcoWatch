@@ -59,21 +59,7 @@ def oat():
     df = df[['1 Yr', '2 Yr', '3 Yr', '5 Yr', '7 Yr', '10 Yr', '15 Yr', '20 Yr', '25 Yr', '30 Yr']]
     df.columns = ['1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '15Y', '20Y', '25Y', '30Y']
     df = df.resample('B').ffill()
-    return df.ffill()  
-
-def ester():
-    url = 'https://data-api.ecb.europa.eu/service/data/EST/B.EU000A2QQF16.CR?format=csvdata'
-    response = requests.get(url)
-    content = response.content.decode('utf-8')
-    content = csv.reader(content.splitlines(), delimiter=',')
-    df = pd.DataFrame(list(content))
-    df.columns = df.loc[0]
-    df = df.drop(0, axis=0)
-    df = df.set_index('TIME_PERIOD')
-    df = df['OBS_VALUE']
-    df.name = 'ESTER'
-    df.index = pd.to_datetime(df.index, format='ISO8601')
-    return df.astype(float)
+    return df.ffill()
 
 import pandas as pd
 import numpy as np
@@ -172,7 +158,7 @@ def ecb(ticker):
     soup = BeautifulSoup(r.content,'xml')
     data = [{'Date': obs['TIME_PERIOD'], 'Value': float(obs['OBS_VALUE'])} for obs in soup.find_all('Obs')]
     df = pd.DataFrame(data, columns=['Date', 'Value'])
-    df['Date'] = pd.to_datetime(df['Date'])
+    df['Date'] = pd.to_datetime(df['Date'], format='ISO8601')
     return df['Value']
 
 import pandas as pd

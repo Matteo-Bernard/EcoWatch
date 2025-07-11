@@ -13,7 +13,6 @@ from .NelsonSiegelCurvature import (
 from .Scraping import (
     tbond,
     oat,
-    ester,
     bunds,
     fred,
     fed_funds,
