@@ -36,6 +36,10 @@ def tbond(first_year, last_year):
     tbond_df.columns = [mat.replace(' Mo', 'M').replace(' Yr', 'Y') for mat in tbond_df.columns] 
     return tbond_df
 
+import numpy as np
+import pandas as pd
+import requests
+import io
 
 def oat():
     url = 'https://webstat.banque-france.fr/export/csv-columns/fr/selection/5385693'
@@ -71,6 +75,11 @@ def ester():
     df.index = pd.to_datetime(df.index, format='ISO8601')
     return df.astype(float)
 
+import pandas as pd
+import numpy as np
+import requests
+import csv
+
 def bunds():    
     urls = {
         '1Y'    : 'https://api.statistiken.bundesbank.de/rest/download/BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R01XX.R.A.A._Z._Z.A?format=csv&lang=en',
@@ -96,20 +105,25 @@ def bunds():
     df.index = pd.to_datetime(df.index, format='ISO8601')
     return df.astype(float)
 
+import pandas as pd
+import requests
+
 def fred(key, ticker):
-    # Get an economical series
     url = f'https://api.stlouisfed.org/fred/series/observations?series_id={ticker}&api_key={key}&file_type=json'
     response = requests.get(url)
 
-    # Clean the response
     df = pd.DataFrame(data=response.json()['observations'])
     df.index = pd.to_datetime(df.date)
 
-    # Transform string into float
     df = df.loc[:,'value']
     df = df[df != "."]
     df = df.astype(float)
     return df
+
+import pandas as pd
+import io
+import requests
+import datetime as dt
 
 def fed_funds(ticker='EFFR'):
     """
@@ -156,10 +170,7 @@ def ecb(ticker):
     url = f'https://data-api.ecb.europa.eu/service/data/{key}?format=xml'
     r = requests.get(url=url, headers=headers)
     soup = BeautifulSoup(r.content,'xml')
-    data = [
-        {'Date': obs['TIME_PERIOD'], 'Value': float(obs['OBS_VALUE'])}
-        for obs in soup.find_all('Obs')
-    ]
+    data = [{'Date': obs['TIME_PERIOD'], 'Value': float(obs['OBS_VALUE'])} for obs in soup.find_all('Obs')]
     df = pd.DataFrame(data, columns=['Date', 'Value'])
     df = df.set_index('Date', drop=True)
     df.index = pd.to_datetime(df.index)
