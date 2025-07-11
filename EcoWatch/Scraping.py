@@ -43,7 +43,6 @@ def oat():
     csv_file = io.StringIO(response.text)
     df = pd.read_csv(csv_file, header=5, sep = ';')
 
-    # Clean and process the data
     columns = ['Date', '1 Yr', '10 Yr', '15 Yr', '2 Yr', '20 Yr', '25 Yr', '3 Yr', '30 Yr', '5 Yr', '7 Yr']
     df.columns = columns
     df = df.set_index('Date')
@@ -52,7 +51,6 @@ def oat():
     df = df.replace(',', '.', regex=True)
     df = pd.concat([pd.to_numeric(df[col], errors='coerce') for col in df.columns], axis=1)
     
-    # Sort and fill missing values
     df = df.sort_index()
     df = df[['1 Yr', '2 Yr', '3 Yr', '5 Yr', '7 Yr', '10 Yr', '15 Yr', '20 Yr', '25 Yr', '30 Yr']]
     df.columns = ['1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '15Y', '20Y', '25Y', '30Y']
@@ -178,7 +176,6 @@ import json
 import time
 
 def cnn():
-    # Configuration du navigateur
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -186,17 +183,10 @@ def cnn():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.199 Safari/537.36")
 
-    # Initialisation du driver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-
-    # URL cible
     url = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
-
-    # Ouverture de la page
     driver.get(url)
     time.sleep(2)
-
-    # Récupération brute du texte JSON
     json_raw = driver.find_element(By.TAG_NAME, "pre").text
     json_clean = json.loads(json_raw)
     driver.quit()
