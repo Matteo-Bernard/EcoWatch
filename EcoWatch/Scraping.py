@@ -103,8 +103,8 @@ def fred(key, ticker):
 
     df = df.loc[:,'value']
     df = df[df != "."]
-    df = df.astype(float)
-    return df
+    df.name = ticker
+    return df.astype(float)
 
 import pandas as pd
 import io
@@ -156,11 +156,10 @@ def ecb(ticker):
     url = f'https://data-api.ecb.europa.eu/service/data/{key}?format=xml'
     r = requests.get(url=url, headers=headers)
     soup = BeautifulSoup(r.content,'xml')
-    data = [{'Date': obs['TIME_PERIOD'], 'Value': float(obs['OBS_VALUE'])} for obs in soup.find_all('Obs')]
-    df = pd.DataFrame(data, columns=['Date', 'Value'])
-    df['Date'] = pd.to_datetime(df['Date'], format='ISO8601')
-    df = df.set_index('Date', drop=True)
-    return df['Value']
+    data = [{'Date': obs['TIME_PERIOD'], ticker: float(obs['OBS_VALUE'])} for obs in soup.find_all('Obs')]
+    df = pd.DataFrame(data).set_index('Date').squeeze()
+    df.index = pd.to_datetime(df.index, format='ISO8601')
+    return df.astype(float)
 
 import pandas as pd
 import datetime as dt
@@ -210,9 +209,7 @@ def cnn():
     
     df.index = pd.to_datetime(df.index, unit='ms')
     df = df.resample('B').last()
-    df = df.dropna()
-
-    return df
+    return df.dropna()
 
 import pandas as pd
 import requests
